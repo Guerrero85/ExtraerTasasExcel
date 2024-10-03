@@ -54,7 +54,7 @@ class Program
 
                     var sheetName = sheet.Name;
                     var fecha = DateTime.ParseExact(sheetName, "ddMMyyyy", null);
-                    fecha = fecha.AddDays(1);
+                    
 
                     results.Add(new Result
                         {
@@ -90,6 +90,96 @@ class Program
 
             Console.WriteLine($"Resultados guardados en {outputFile}");
             #endregion
+
+             
+            #region Generar script de inserción 
+
+            #region Generar script de inserción Administrativo
+            string scriptFileAdministrativo = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Downloads", "scriptAdministrativo.sql");
+            using (StreamWriter writer = new StreamWriter(scriptFileAdministrativo))
+            {
+
+                writer.WriteLine("IF exists(select* from saMoneda where co_mone = N'USD   ' )");
+                writer.WriteLine("BEGIN");
+
+                foreach (var result in results)
+                {
+                    var tasaUSD = new { moneda = "USD", tasaC = result.USD_F, tasaV = result.USD_G };
+                    writer.WriteLine($"IF NOT EXISTS (select co_mone from satasa where co_mone = N'{tasaUSD.moneda}   ' and fecha = CAST(N'{result.FechaOperacion.ToString("yyyy-MM-dd HH:mm:ss")}' AS SmallDateTime) ) INSERT [dbo].[satasa] ([co_mone], [fecha], [tasa_c], [tasa_v], [campo1], [campo2], [campo3], [campo4], [campo5], [campo6], [campo7], [campo8], [co_us_in], [co_sucu_in], [fe_us_in], [co_us_mo], [co_sucu_mo], [fe_us_mo], [revisado], [trasnfe])  VALUES (N'{tasaUSD.moneda}   ', CAST(N'{result.FechaOperacion.ToString("yyyy-MM-dd HH:mm:ss")}' AS SmallDateTime), CAST({tasaUSD.tasaC.ToString(CultureInfo.InvariantCulture)} AS Decimal(21, 8)), CAST({tasaUSD.tasaV.ToString(CultureInfo.InvariantCulture)} AS Decimal(21, 8)), NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, N'PROFIT', NULL, CAST(N'{result.FechaOperacion.ToString("yyyy-MM-dd HH:mm:ss")}' AS DateTime), N'PROFIT', NULL, CAST(N'{result.FechaOperacion.ToString("yyyy-MM-dd HH:mm:ss")}' AS DateTime), NULL, NULL)");
+                }
+                writer.WriteLine("END");
+
+                writer.WriteLine(" ");
+
+                writer.WriteLine("IF exists(select* from saMoneda where co_mone = N'EUR   ' )");
+                writer.WriteLine("BEGIN");
+                foreach (var result in results)
+                {
+                    var tasaEUR = new { moneda = "EUR", tasaC = result.EUR_F, tasaV = result.EUR_G };
+                    writer.WriteLine($"IF NOT EXISTS (select co_mone from satasa where co_mone = N'{tasaEUR.moneda}   ' and fecha = CAST(N'{result.FechaOperacion.ToString("yyyy-MM-dd HH:mm:ss")}' AS SmallDateTime) ) INSERT [dbo].[satasa] ([co_mone], [fecha], [tasa_c], [tasa_v], [campo1], [campo2], [campo3], [campo4], [campo5], [campo6], [campo7], [campo8], [co_us_in], [co_sucu_in], [fe_us_in], [co_us_mo], [co_sucu_mo], [fe_us_mo], [revisado], [trasnfe])  VALUES (N'{tasaEUR.moneda}   ', CAST(N'{result.FechaOperacion.ToString("yyyy-MM-dd HH:mm:ss")}' AS SmallDateTime), CAST({tasaEUR.tasaC.ToString(CultureInfo.InvariantCulture)} AS Decimal(21, 8)), CAST({tasaEUR.tasaV.ToString(CultureInfo.InvariantCulture)} AS Decimal(21, 8)), NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, N'PROFIT', NULL, CAST(N'{result.FechaOperacion.ToString("yyyy-MM-dd HH:mm:ss")}' AS DateTime), N'PROFIT', NULL, CAST(N'{result.FechaOperacion.ToString("yyyy-MM-dd HH:mm:ss")}' AS DateTime), NULL, NULL)");
+                }
+                writer.WriteLine("END");
+            }
+            #endregion
+
+            #region Generar script de inserción Nomina
+            string scriptFileNomina = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Downloads", "scriptNomina.sql");
+            using (StreamWriter writer = new StreamWriter(scriptFileNomina))
+            {
+
+                writer.WriteLine("IF exists(select* from snMoneda where co_mone = N'USD   ' )");
+                writer.WriteLine("BEGIN");
+
+                foreach (var result in results)
+                {
+                    var tasaUSD = new { moneda = "USD", tasaC = result.USD_F, tasaV = result.USD_G };
+                    writer.WriteLine($"IF NOT EXISTS (select co_mone from sntasa where co_mone = N'{tasaUSD.moneda}   ' and fecha = CAST(N'{result.FechaOperacion.ToString("yyyy-MM-dd HH:mm:ss")}' AS SmallDateTime) ) INSERT [dbo].[sntasa] ([co_mone], [fecha], [tasa_c], [tasa_v], [campo1], [campo2], [campo3], [campo4], [campo5], [campo6], [campo7], [campo8], [co_us_in], [fe_us_in], [co_us_mo], [fe_us_mo], [revisado], [trasnfe])  VALUES (N'{tasaUSD.moneda}   ', CAST(N'{result.FechaOperacion.ToString("yyyy-MM-dd HH:mm:ss")}' AS SmallDateTime), CAST({tasaUSD.tasaC.ToString(CultureInfo.InvariantCulture)} AS Decimal(21, 8)), CAST({tasaUSD.tasaV.ToString(CultureInfo.InvariantCulture)} AS Decimal(21, 8)), NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, N'PROFIT', CAST(N'{result.FechaOperacion.ToString("yyyy-MM-dd HH:mm:ss")}' AS DateTime), N'PROFIT', CAST(N'{result.FechaOperacion.ToString("yyyy-MM-dd HH:mm:ss")}' AS DateTime), NULL, NULL)");
+                }
+                writer.WriteLine("END");
+
+                writer.WriteLine(" ");
+
+                writer.WriteLine("IF exists(select* from snMoneda where co_mone = N'EUR   ' )");
+                writer.WriteLine("BEGIN");
+                foreach (var result in results)
+                {
+                    var tasaEUR = new { moneda = "EUR", tasaC = result.EUR_F, tasaV = result.EUR_G };
+                    writer.WriteLine($"IF NOT EXISTS (select co_mone from sntasa where co_mone = N'{tasaEUR.moneda}   ' and fecha = CAST(N'{result.FechaOperacion.ToString("yyyy-MM-dd HH:mm:ss")}' AS SmallDateTime) ) INSERT [dbo].[sntasa] ([co_mone], [fecha], [tasa_c], [tasa_v], [campo1], [campo2], [campo3], [campo4], [campo5], [campo6], [campo7], [campo8], [co_us_in], [fe_us_in], [co_us_mo], [fe_us_mo], [revisado], [trasnfe])  VALUES (N'{tasaEUR.moneda}   ', CAST(N'{result.FechaOperacion.ToString("yyyy-MM-dd HH:mm:ss")}' AS SmallDateTime), CAST({tasaEUR.tasaC.ToString(CultureInfo.InvariantCulture)} AS Decimal(21, 8)), CAST({tasaEUR.tasaV.ToString(CultureInfo.InvariantCulture)} AS Decimal(21, 8)), NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, N'PROFIT', CAST(N'{result.FechaOperacion.ToString("yyyy-MM-dd HH:mm:ss")}' AS DateTime), N'PROFIT', CAST(N'{result.FechaOperacion.ToString("yyyy-MM-dd HH:mm:ss")}' AS DateTime), NULL, NULL)");
+                }
+                writer.WriteLine("END");
+            }
+            #endregion
+
+            #region Generar script de inserción Contabilidad
+            string scriptFileContabilidad = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Downloads", "scriptContabilidad.sql");
+            using (StreamWriter writer = new StreamWriter(scriptFileContabilidad))
+            {
+
+                writer.WriteLine("IF exists(select* from scMoneda where co_mone = N'USD   ' )");
+                writer.WriteLine("BEGIN");
+
+                foreach (var result in results)
+                {
+                    var tasaUSD = new { moneda = "USD", tasaC = result.USD_F, tasaV = result.USD_G };
+                    writer.WriteLine($"IF NOT EXISTS (select co_mone from sctasa where co_mone = N'{tasaUSD.moneda}   ' and fecha = CAST(N'{result.FechaOperacion.ToString("yyyy-MM-dd HH:mm:ss")}' AS SmallDateTime) ) INSERT [dbo].[sctasa] ([co_mone], [fecha], [tasa_c], [tasa_v], [campo1], [campo2], [campo3], [campo4], [campo5], [campo6], [campo7], [campo8], [co_us_in], [fe_us_in], [co_us_mo], [fe_us_mo], [revisado], [trasnfe])  VALUES (N'{tasaUSD.moneda}   ', CAST(N'{result.FechaOperacion.ToString("yyyy-MM-dd HH:mm:ss")}' AS SmallDateTime), CAST({tasaUSD.tasaC.ToString(CultureInfo.InvariantCulture)} AS Decimal(21, 8)), CAST({tasaUSD.tasaV.ToString(CultureInfo.InvariantCulture)} AS Decimal(21, 8)), NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, N'PROFIT', CAST(N'{result.FechaOperacion.ToString("yyyy-MM-dd HH:mm:ss")}' AS DateTime), N'PROFIT', CAST(N'{result.FechaOperacion.ToString("yyyy-MM-dd HH:mm:ss")}' AS DateTime), NULL, NULL)");
+                }
+                writer.WriteLine("END");
+
+                writer.WriteLine(" ");
+
+                writer.WriteLine("IF exists(select* from scMoneda where co_mone = N'EUR   ' )");
+                writer.WriteLine("BEGIN");
+                foreach (var result in results)
+                {
+                    var tasaEUR = new { moneda = "EUR", tasaC = result.EUR_F, tasaV = result.EUR_G };
+                    writer.WriteLine($"IF NOT EXISTS (select co_mone from sctasa where co_mone = N'{tasaEUR.moneda}   ' and fecha = CAST(N'{result.FechaOperacion.ToString("yyyy-MM-dd HH:mm:ss")}' AS SmallDateTime) ) INSERT [dbo].[sctasa] ([co_mone], [fecha], [tasa_c], [tasa_v], [campo1], [campo2], [campo3], [campo4], [campo5], [campo6], [campo7], [campo8], [co_us_in], [fe_us_in], [co_us_mo], [fe_us_mo], [revisado], [trasnfe])  VALUES (N'{tasaEUR.moneda}   ', CAST(N'{result.FechaOperacion.ToString("yyyy-MM-dd HH:mm:ss")}' AS SmallDateTime), CAST({tasaEUR.tasaC.ToString(CultureInfo.InvariantCulture)} AS Decimal(21, 8)), CAST({tasaEUR.tasaV.ToString(CultureInfo.InvariantCulture)} AS Decimal(21, 8)), NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, N'PROFIT', CAST(N'{result.FechaOperacion.ToString("yyyy-MM-dd HH:mm:ss")}' AS DateTime), N'PROFIT', CAST(N'{result.FechaOperacion.ToString("yyyy-MM-dd HH:mm:ss")}' AS DateTime), NULL, NULL)");
+                }
+                writer.WriteLine("END");
+            }
+            #endregion
+
+            Console.WriteLine($"Script generado en Downloads/Descargas");
+            #endregion   
 
             await GuardarTasa(results, connectionString);
         }
